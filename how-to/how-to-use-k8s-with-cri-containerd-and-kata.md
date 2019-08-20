@@ -23,13 +23,13 @@ to launch Kata Containers. For the previous version of Kata Containers, the Pods
 
 ## Requirements
 
-- Kubernetes, kubelet, kubeadm
+- Kubernetes, Kubelet, `kubeadm`
 - containerd with `cri` plug-in
 - Kata Containers
 
 > **Note:** For information about the supported versions of these components,
 > see the  Kata Containers
-> [versions.yaml](https://github.com/kata-containers/runtime/blob/master/versions.yaml)
+> [`versions.yaml`](https://github.com/kata-containers/runtime/blob/master/versions.yaml)
 > file.
 
 ## Install and configure containerd
@@ -42,7 +42,7 @@ Then, make sure the containerd works with the [examples in it](containerd-kata.m
 ### Install Kubernetes
 
 - Follow the instructions for
-  [kubeadm installation](https://kubernetes.io/docs/setup/independent/install-kubeadm/).
+  [`kubeadm` installation](https://kubernetes.io/docs/setup/independent/install-kubeadm/).
 
 - Check `kubeadm` is now available
 
@@ -52,7 +52,7 @@ Then, make sure the containerd works with the [examples in it](containerd-kata.m
 
 ### Configure Kubelet to use containerd
 
-In order to allow kubelet to use containerd (using the CRI interface), configure the service to point to the `containerd` socket.
+In order to allow Kubelet to use containerd (using the CRI interface), configure the service to point to the `containerd` socket.
 
 - Configure Kubernetes to use `containerd`
 
@@ -72,7 +72,7 @@ In order to allow kubelet to use containerd (using the CRI interface), configure
 
 ### Configure HTTP proxy - OPTIONAL
 
-If you are behind a proxy, use the following script to configure your proxy for docker, kubelet, and containerd:
+If you are behind a proxy, use the following script to configure your proxy for docker, Kubelet, and containerd:
 
 ```bash
 $ services="
@@ -130,7 +130,7 @@ $ sudo systemctl daemon-reload
 A pod network plugin is needed to allow pods to communicate with each other.
 
 - Install the `flannel` plugin by following the
-  [Using kubeadm to Create a Cluster](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#instructions)
+  [Using `kubeadm` to Create a Cluster](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#instructions)
   guide, starting from the **Installing a pod network** section.
 
 - Create a pod network using flannel

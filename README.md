@@ -9,6 +9,7 @@
     * [Code Licensing](#code-licensing)
     * [The Release Process](#the-release-process)
 * [Help Improving the Documents](#help-improving-the-documents)
+* [Website Changes](#website-changes)
 
 The [Kata Containers](https://github.com/kata-containers)
 documentation repository hosts overall system documentation, with information
@@ -36,6 +37,7 @@ See the [howto documentation](how-to).
 * [GPU Passthrough with Kata](./use-cases/GPU-passthrough-and-Kata.md)
 * [OpenStack Zun with Kata Containers](./use-cases/zun_kata.md)
 * [SR-IOV with Kata](./use-cases/using-SRIOV-and-kata.md)
+* [Intel QAT with Kata](./use-cases/using-Intel-QAT-and-kata.md)
 * [VPP with Kata](./use-cases/using-vpp-and-kata.md)
 
 ## Developer Guide
@@ -66,3 +68,9 @@ Documents that help to understand and contribute to Kata Containers.
 ## Help Improving the Documents
 
 * [Documentation Requirements](Documentation-Requirements.md)
+
+## Website Changes
+
+If you have a suggestion for how we can improve the
+[website](https://katacontainers.io), please raise an issue (or a PR) on
+[the repository that holds the source for the website](https://github.com/OpenStackweb/kata-netlify-refresh).

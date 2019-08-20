@@ -33,7 +33,7 @@
 * [Run Kata Containers with Kubernetes](#run-kata-containers-with-kubernetes)
     * [Install a CRI implementation](#install-a-cri-implementation)
         * [CRI-O](#cri-o)
-        * [containerd with cri plugin](#containerd-with-cri-plugin)
+        * [containerd with CRI plugin](#containerd-with-cri-plugin)
     * [Install Kubernetes](#install-kubernetes)
         * [Configure for CRI-O](#configure-for-cri-o)
         * [Configure for containerd](#configure-for-containerd)
@@ -133,7 +133,7 @@ $ sudo sed -i 's/^\(initrd =.*\)/# \1/g' /etc/kata-containers/configuration.toml
 ```
 The rootfs image is created as shown in the [create a rootfs image](#create-a-rootfs-image) section.
 
-One of the `initrd` and `image` options in kata runtime config file **MUST** be set but **not both**.
+One of the `initrd` and `image` options in Kata runtime config file **MUST** be set but **not both**.
 The main difference between the options is that the size of `initrd`(10MB+) is significantly smaller than
 rootfs `image`(100MB+).
 
@@ -297,7 +297,7 @@ $ sudo rm -rf ${ROOTFS_DIR}
 $ cd $GOPATH/src/github.com/kata-containers/osbuilder/rootfs-builder
 $ script -fec 'sudo -E GOPATH=$GOPATH AGENT_INIT=yes USE_DOCKER=true SECCOMP=no ./rootfs.sh ${distro}'
 ```
-`AGENT_INIT` controls if the guest image uses kata agent as the guest `init` process. When you create an initrd image,
+`AGENT_INIT` controls if the guest image uses the Kata agent as the guest `init` process. When you create an initrd image,
 always set `AGENT_INIT` to `yes`. By default `seccomp` packages are not included in the initrd image. Set `SECCOMP` to `yes` to include them.
 
 You MUST choose one of `alpine`, `centos`, `clearlinux`, `euleros`, and `fedora` for `${distro}`.
@@ -330,40 +330,7 @@ $ (cd /usr/share/kata-containers && sudo ln -sf "$image" kata-containers-initrd.
 
 # Install guest kernel images
 
-As a prerequisite, you need to install `libelf-dev` and `bc`. Otherwise, you
-will not be able to build the kernel from sources.
-
-```
-$ go get github.com/kata-containers/tests
-$ cd $GOPATH/src/github.com/kata-containers/tests/.ci
-$ kernel_arch="$(./kata-arch.sh)"
-$ kernel_dir="$(./kata-arch.sh --kernel)"
-$ tmpdir="$(mktemp -d)"
-$ pushd "$tmpdir"
-$ curl -L https://raw.githubusercontent.com/kata-containers/packaging/master/kernel/configs/${kernel_dir}_kata_kvm_4.14.x -o .config
-$ kernel_version=$(grep "Linux/[${kernel_arch}]*" .config | cut -d' ' -f3 | tail -1)
-$ kernel_tar_file="linux-${kernel_version}.tar.xz"
-$ kernel_url="https://cdn.kernel.org/pub/linux/kernel/v$(echo $kernel_version | cut -f1 -d.).x/${kernel_tar_file}"
-$ curl -LOk ${kernel_url}
-$ tar -xf ${kernel_tar_file}
-$ mv .config "linux-${kernel_version}"
-$ pushd "linux-${kernel_version}"
-$ curl -L https://raw.githubusercontent.com/kata-containers/packaging/master/kernel/patches/4.19.x/0001-NO-UPSTREAM-9P-always-use-cached-inode-to-fill-in-v9.patch | patch -p1
-$ curl -L https://raw.githubusercontent.com/kata-containers/packaging/master/kernel/patches/4.19.x/0002-Compile-in-evged-always.patch | patch -p1
-$ make ARCH=${kernel_dir} -j$(nproc)
-$ kata_kernel_dir="/usr/share/kata-containers"
-$ kata_vmlinuz="${kata_kernel_dir}/kata-vmlinuz-${kernel_version}.container"
-$ case $kernel_arch in ppc64le) kernel_path="./vmlinux";; aarch64) kernel_path="arch/arm64/boot/Image";; *) kernel_path="arch/${kernel_arch}/boot/bzImage";; esac
-$ kernel_file="$(realpath $kernel_path)"
-$ sudo install -o root -g root -m 0755 -D "${kernel_file}" "${kata_vmlinuz}"
-$ sudo ln -sf "${kata_vmlinuz}" "${kata_kernel_dir}/vmlinuz.container"
-$ kata_vmlinux="${kata_kernel_dir}/kata-vmlinux-${kernel_version}"
-$ sudo install -o root -g root -m 0755 -D "$(realpath vmlinux)" "${kata_vmlinux}"
-$ sudo ln -sf "${kata_vmlinux}" "${kata_kernel_dir}/vmlinux.container"
-$ popd
-$ popd
-$ rm -rf "${tmpdir}"
-```
+You can build and install the guest kernel image as shown [here](https://github.com/kata-containers/packaging/tree/master/kernel#build-kata-containers-kernel).
 
 # Install a hypervisor
 
@@ -371,7 +338,7 @@ When setting up Kata using a [packaged installation method](https://github.com/k
 
 ## Build a custom QEMU
 
-Your qemu directory need to be prepared with source code. Alternatively, you can use the [Kata containers QEMU](https://github.com/kata-containers/qemu/tree/master) and checkout the recommended branch:
+Your QEMU directory need to be prepared with source code. Alternatively, you can use the [Kata containers QEMU](https://github.com/kata-containers/qemu/tree/master) and checkout the recommended branch:
 
 ```
 $ go get -d github.com/kata-containers/qemu
@@ -397,7 +364,7 @@ $ sudo -E make install
 >
 > - You should only do this step if you are on aarch64/arm64.
 > - You should include [Eric Auger's latest PCDIMM/NVDIMM patches](https://patchwork.kernel.org/cover/10647305/) which are
->   under upstream review for supporting nvdimm on aarch64.
+>   under upstream review for supporting NVDIMM on aarch64.
 >
 You could build the custom `qemu-system-aarch64` as required with the following command:
 ```
@@ -508,7 +475,7 @@ Restart CRI-O to take changes into account
 $ sudo systemctl restart crio
 ```
 
-### containerd with cri plugin
+### containerd with CRI plugin
 
 If you select containerd with `cri` plugin, follow the "Getting Started for Developers"
 instructions [here](https://github.com/containerd/cri#getting-started-for-developers)
@@ -522,12 +489,11 @@ To customize containerd to select Kata Containers runtime, follow our
 
 Depending on what your needs are and what you expect to do with Kubernetes,
 please refer to the following
-[documentation](https://kubernetes.io/docs/setup/pick-right-solution/) to
-install it correctly.
+[documentation](https://kubernetes.io/docs/setup/) to install it correctly.
 
 Kubernetes talks with CRI implementations through a `container-runtime-endpoint`,
 also called CRI socket. This socket path is different depending on which CRI
-implementation you chose, and the kubelet service has to be updated accordingly.
+implementation you chose, and the Kubelet service has to be updated accordingly.
 
 ### Configure for CRI-O
 
@@ -549,8 +515,8 @@ documentation [here](https://github.com/kata-containers/documentation/blob/maste
 
 ## Run a Kubernetes pod with Kata Containers
 
-After you update your kubelet service based on the CRI implementation you
-are using, reload and restart kubelet. Then, start your cluster:
+After you update your Kubelet service based on the CRI implementation you
+are using, reload and restart Kubelet. Then, start your cluster:
 ```bash
 $ sudo systemctl daemon-reload
 $ sudo systemctl restart kubelet
@@ -564,11 +530,11 @@ $ sudo kubeadm init --skip-preflight-checks --cri-socket /run/containerd/contain
 $ export KUBECONFIG=/etc/kubernetes/admin.conf
 ```
 
-You can force kubelet to use Kata Containers by adding some _untrusted_
+You can force Kubelet to use Kata Containers by adding some `untrusted`
 annotation to your pod configuration. In our case, this ensures Kata
 Containers is the selected runtime to run the described workload.
 
-_nginx-untrusted.yaml_
+`nginx-untrusted.yaml`
 ```yaml
 apiVersion: v1
 kind: Pod
@@ -594,7 +560,7 @@ If you are unable to create a Kata Container first ensure you have
 before attempting to create a container. Then run the
 [`kata-collect-data.sh`](https://github.com/kata-containers/runtime/blob/master/data/kata-collect-data.sh.in)
 script and paste its output directly into a
-[github issue](https://github.com/kata-containers/kata-containers/issues/new).
+[GitHub issue](https://github.com/kata-containers/kata-containers/issues/new).
 
 > **Note:**
 >
@@ -637,30 +603,36 @@ boot the virtual machine.
 If you want to login to a virtual machine that hosts your containers, complete
 the following steps, which assume the use of a rootfs image.
 
-> **Note:** The debug console instructions below assume a systemd based guest
-> O/S image meaning you must create a rootfs for a distro that supports
-> systemd. Currently, all distros supported by
-> [osbuilder](https://github.com/kata-containers/osbuilder) support systemd,
-> except for Alpine Linux. To check if a distro supports systemd look for
-> `INIT_PROCESS=systemd` in the `config.sh` osbuilder rootfs config file for
-> the distro you wish to build a rootfs for (for example see the [Clear Linux
-> `config.sh`
-> file](https://github.com/kata-containers/osbuilder/blob/master/rootfs-builder/clearlinux/config.sh)).
-> For non-systemd based distros, you will need to create an equivalent system
-> service using that distros init system syntax instead.
+> **Note:** The following debug console instructions assume a systemd-based guest
+> O/S image. This means you must create a rootfs for a distro that supports systemd.
+> Currently, all distros supported by [osbuilder](https://github.com/kata-containers/osbuilder) support systemd
+> except for Alpine Linux. 
+>
+> Look for `INIT_PROCESS=systemd` in the `config.sh` osbuilder rootfs config file
+> to verify an osbuilder distro supports systemd for the distro you want to build rootfs for.
+> For an example, see the [Clear Linux config.sh file](https://github.com/kata-containers/osbuilder/blob/master/rootfs-builder/clearlinux/config.sh).
+>
+> For a non-systemd-based distro, create an equivalent system
+> service using that distro’s init system syntax. Alternatively, you can build a distro
+> that contains a shell (e.g. `bash(1)`). In this circumstance it is likely you need to install
+> additional packages in the rootfs and add “agent.debug_console” to kernel parameters in the runtime
+> config file. This tells the Kata agent to launch the console directly.
+>
+> Once these steps are taken you can connect to the virtual machine using the [debug console](https://github.com/kata-containers/documentation/blob/master/Developer-Guide.md#connect-to-the-virtual-machine-using-the-debug-console).
 
 ### Create a custom image containing a shell
 
 To login to a virtual machine, you must
 [create a custom rootfs](#create-a-rootfs-image)
-containing a shell such as `bash(1)`.
+containing a shell such as `bash(1)`. For Clear Linux, you will need
+an additional `coreutils` package.
 
 For example using CentOS:
 
 ```
 $ cd $GOPATH/src/github.com/kata-containers/osbuilder/rootfs-builder
 $ export ROOTFS_DIR=${GOPATH}/src/github.com/kata-containers/osbuilder/rootfs-builder/rootfs
-$ script -fec 'sudo -E GOPATH=$GOPATH USE_DOCKER=true EXTRA_PKGS="bash" ./rootfs.sh centos'
+$ script -fec 'sudo -E GOPATH=$GOPATH USE_DOCKER=true EXTRA_PKGS="bash coreutils" ./rootfs.sh centos'
 ```
 
 ### Create a debug systemd service
